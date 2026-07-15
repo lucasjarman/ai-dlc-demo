@@ -22,9 +22,9 @@ bws --color no secret get <id> -o json | jq -r .value                  # always 
 
 ## Architecture
 
-**App:** Python FastAPI (`app/`) → Docker image → GCP Cloud Run (`ai-dlc-demo`)
-**Public URL:** `https://ai-dlc.ljarman.dev` (Cloudflare proxied, WAF-restricted to Wiz ASM IPs + home IP)
-**Direct Cloud Run URL:** set in `terraform/terraform.tfvars` after first apply (gitignored)
+**App:** Python FastAPI (`app/`) → Docker image (GCR) → GCP Cloud Run (`ai-dlc-demo`)
+**Public URL:** `https://ai-dlc-demo-332394484301.us-central1.run.app` (direct Cloud Run, public)
+**Image:** `gcr.io/clgcporg40-p001/ai-dlc-demo/app:latest` (build with `--platform linux/amd64`)
 
 **Intentional risks (the demo story):**
 - `app/main.py`: SQL injection in `/api/customers`, hardcoded secrets, unauthenticated export endpoint
@@ -47,20 +47,38 @@ Internet (allUsers)
 **Auth:** gcloud container in OrbStack — see user for container name and auth steps.
 All `gcloud` / `terraform` commands run inside the container.
 
+**GCP auth:** `GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcloud-ailab/adc.json CLOUDSDK_CONFIG=/tmp/gcloud-ailab`
+(Credentials live in `/tmp/gcloud-ailab/` — regenerate from `gcloud-gemini` container if expired)
+
 **Terraform apply pattern:**
 ```sh
-export BWS_ACCESS_TOKEN="$(cat ~/.config/wiz-onprem-demo/bws-token)"
-export CLOUDFLARE_API_TOKEN="$(bws --color no secret get e460fedc-b741-4aa0-b8c4-b485004684b7 -o json | jq -r .value)"
-# Also set WIZ_SENSOR_KEY in terraform.tfvars (from Wiz portal > Deployments > Runtime Sensor)
-HOME_IP=$(curl -s ifconfig.me)
-cd terraform && terraform apply -var="home_ip=$HOME_IP"
+GOOGLE_APPLICATION_CREDENTIALS=/tmp/gcloud-ailab/adc.json \
+CLOUDSDK_CONFIG=/tmp/gcloud-ailab \
+terraform apply
 ```
 
-**terraform.tfvars (gitignored — create manually):**
+**terraform.tfvars (gitignored):**
 ```hcl
-project_id     = "<GCP_PROJECT_ID>"         # user provides
-wiz_sensor_key = "<WIZ_SENSOR_KEY>"         # from BWS once user adds it
-wiz_asm_ips    = ["<IP1>", "<IP2>", ...]    # Wiz portal > Tenant Info > Wiz IPs > ASM
+project_id               = "clgcporg40-p001"
+region                   = "us-central1"
+wiz_sensor_client_id     = "<from BWS wiz-demos/wiz-sensor-client-id>"
+wiz_sensor_client_secret = "<from BWS wiz-demos/wiz-sensor-client-secret>"
+```
+
+**Image rebuild + redeploy:**
+```sh
+# Build (always --platform linux/amd64 — built on Apple Silicon)
+docker build --platform linux/amd64 -t gcr.io/clgcporg40-p001/ai-dlc-demo/app:latest ./app
+
+# Auth to GCR using the gcloud-gemini container token
+SA_TOKEN=$(docker exec gcloud-gemini gcloud auth print-access-token)
+echo "$SA_TOKEN" | docker login gcr.io --username oauth2accesstoken --password-stdin
+docker push gcr.io/clgcporg40-p001/ai-dlc-demo/app:latest
+
+# Redeploy
+docker exec gcloud-gemini gcloud run services update ai-dlc-demo \
+  --image gcr.io/clgcporg40-p001/ai-dlc-demo/app:latest \
+  --region us-central1 --project clgcporg40-p001
 ```
 
 ## GitHub Integration

@@ -110,7 +110,7 @@ def list_customers(search: str = Query(default="")):
     db = get_db()
     if search:
         # SECURITY ISSUE: SQL injection via string interpolation
-        query = f"SELECT * FROM customers WHERE name LIKE '%{search}%' OR first_name LIKE '%{search}%' OR last_name LIKE '%{search}%' OR email LIKE '%{search}%'"
+        query = f"SELECT * FROM customers WHERE first_name LIKE '%{search}%' OR last_name LIKE '%{search}%' OR email LIKE '%{search}%'"
     else:
         query = "SELECT * FROM customers LIMIT 50"
     rows = db.execute(query).fetchall()
