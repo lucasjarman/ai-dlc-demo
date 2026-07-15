@@ -1,11 +1,13 @@
 name: Build, Scan & Deploy
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'app/**'
   workflow_dispatch:
+  # push trigger re-enable once GH secrets are set:
+  # GCP_SA_KEY, WIZ_CLIENT_ID, WIZ_CLIENT_SECRET, WIZ_REGISTRY_USERNAME, WIZ_REGISTRY_PASSWORD
+  # push:
+  #   branches: [main]
+  #   paths:
+  #     - 'app/**'
 
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
