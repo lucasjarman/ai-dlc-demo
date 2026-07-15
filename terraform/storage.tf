@@ -4,9 +4,11 @@ resource "google_storage_bucket" "customer_data" {
   location      = var.region
   force_destroy = true
 
-  # SECURITY ISSUE: uniform_bucket_level_access disabled — falls back to legacy ACLs
-  # which are harder to audit and can lead to unintended public exposure.
-  uniform_bucket_level_access = false
+  # Org policy in this project enforces uniform_bucket_level_access = true.
+  # SECURITY ISSUE (still present): no CMEK — default Google-managed encryption only.
+  # The over-privileged SA (roles/editor + roles/storage.objectAdmin) is the primary
+  # lateral movement finding for this bucket.
+  uniform_bucket_level_access = true
 
   # No CMEK — relies on Google-managed default encryption only
 }

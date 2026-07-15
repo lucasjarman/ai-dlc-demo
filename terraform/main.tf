@@ -1,6 +1,6 @@
 locals {
   name = "ai-dlc-demo"
-  image = var.app_image != "" ? var.app_image : "${var.region}-docker.pkg.dev/${var.project_id}/${local.name}/app:latest"
+  image = var.app_image != "" ? var.app_image : "gcr.io/${var.project_id}/${local.name}/app:latest"
 }
 
 # Artifact Registry repository for the app image
