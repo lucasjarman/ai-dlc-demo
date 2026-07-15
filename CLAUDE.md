@@ -23,8 +23,8 @@ bws --color no secret get <id> -o json | jq -r .value                  # always 
 ## Architecture
 
 **App:** Python FastAPI (`app/`) → Docker image (GCR) → GCP Cloud Run (`ai-dlc-demo`)
-**Public URL:** `https://ai-dlc-demo-332394484301.us-central1.run.app` (direct Cloud Run, public)
-**Image:** `gcr.io/clgcporg40-p001/ai-dlc-demo/app:latest` (build with `--platform linux/amd64`)
+**Public URL:** `https://ai-dlc-demo-7v4bxt7c6q-uc.a.run.app` (direct Cloud Run, public)
+**Image:** `gcr.io/clgcporg96-p001/ai-dlc-demo/app:latest` (build with `--platform linux/amd64`)
 
 **Intentional risks (the demo story):**
 - `app/main.py`: SQL injection in `/api/customers`, hardcoded secrets, unauthenticated export endpoint
@@ -59,7 +59,7 @@ terraform apply
 
 **terraform.tfvars (gitignored):**
 ```hcl
-project_id               = "clgcporg40-p001"
+project_id               = "clgcporg96-p001"
 region                   = "us-central1"
 wiz_sensor_client_id     = "<from BWS wiz-demos/wiz-sensor-client-id>"
 wiz_sensor_client_secret = "<from BWS wiz-demos/wiz-sensor-client-secret>"
@@ -68,17 +68,17 @@ wiz_sensor_client_secret = "<from BWS wiz-demos/wiz-sensor-client-secret>"
 **Image rebuild + redeploy:**
 ```sh
 # Build (always --platform linux/amd64 — built on Apple Silicon)
-docker build --platform linux/amd64 -t gcr.io/clgcporg40-p001/ai-dlc-demo/app:latest ./app
+docker build --platform linux/amd64 -t gcr.io/clgcporg96-p001/ai-dlc-demo/app:latest ./app
 
 # Auth to GCR using the gcloud-gemini container token
 SA_TOKEN=$(docker exec gcloud-gemini gcloud auth print-access-token)
 echo "$SA_TOKEN" | docker login gcr.io --username oauth2accesstoken --password-stdin
-docker push gcr.io/clgcporg40-p001/ai-dlc-demo/app:latest
+docker push gcr.io/clgcporg96-p001/ai-dlc-demo/app:latest
 
 # Redeploy
 docker exec gcloud-gemini gcloud run services update ai-dlc-demo \
-  --image gcr.io/clgcporg40-p001/ai-dlc-demo/app:latest \
-  --region us-central1 --project clgcporg40-p001
+  --image gcr.io/clgcporg96-p001/ai-dlc-demo/app:latest \
+  --region us-central1 --project clgcporg96-p001
 ```
 
 ## GitHub Integration
