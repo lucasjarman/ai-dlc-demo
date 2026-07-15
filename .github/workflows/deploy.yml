@@ -2,7 +2,7 @@ name: Build, Scan & Deploy
 
 on:
   workflow_dispatch:
-  # push trigger re-enable once GH secrets are set:
+  # Uncomment once secrets are set:
   # GCP_SA_KEY, WIZ_CLIENT_ID, WIZ_CLIENT_SECRET, WIZ_REGISTRY_USERNAME, WIZ_REGISTRY_PASSWORD
   # push:
   #   branches: [main]
@@ -12,7 +12,6 @@ on:
 env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: us-central1
-  REPO: ai-dlc-demo
   SERVICE: ai-dlc-demo
 
 jobs:
@@ -34,10 +33,10 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
-      - name: Configure Docker for Artifact Registry
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker gcr.io --quiet
 
-      # Login to Wiz registry to pull the Runtime Sensor image in the Docker build
+      # Login to Wiz registry — needed to pull the Runtime Sensor in the Docker build stage
       - name: Login to Wiz registry
         uses: docker/login-action@v3
         with:
@@ -48,19 +47,21 @@ jobs:
       - name: Build image
         id: build
         run: |
-          IMAGE="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO }}/app:${{ github.sha }}"
-          docker build -t "$IMAGE" -t "${IMAGE%:*}:latest" ./app
+          IMAGE="gcr.io/${{ env.PROJECT_ID }}/ai-dlc-demo/app:${{ github.sha }}"
+          docker build --platform linux/amd64 -t "$IMAGE" -t "gcr.io/${{ env.PROJECT_ID }}/ai-dlc-demo/app:latest" ./app
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
-      # wizcli image scan — posts findings to Wiz platform and evaluates CI/CD policy.
-      # Non-blocking (--exit-code 0 or no --policies flag) so build continues with findings.
-      # The separate 'wizcli tag' step below creates the code-to-cloud mapping in Wiz.
       - name: Install wizcli
         run: |
           curl -fsSLo wizcli https://downloads.wiz.io/v1/wizcli/latest/wizcli-linux-amd64
           chmod +x wizcli
 
+      # Scan the LOCAL image before pushing.
+      # Findings are reported to Wiz automatically (Findings > Code & Build Scans).
+      # continue-on-error keeps the pipeline running even if a policy would fail —
+      # for this demo we want findings visible in Wiz without blocking deploys.
       - name: Wiz image scan
+        continue-on-error: true
         env:
           WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
@@ -68,14 +69,15 @@ jobs:
           ./wizcli scan container-image "${{ steps.build.outputs.image }}" \
             --output table
 
-      - name: Push image to Artifact Registry
+      - name: Push image to GCR
         run: |
-          IMAGE="${{ steps.build.outputs.image }}"
-          docker push "$IMAGE"
-          docker push "${IMAGE%:*}:latest"
+          docker push "${{ steps.build.outputs.image }}"
+          docker push "gcr.io/${{ env.PROJECT_ID }}/ai-dlc-demo/app:latest"
 
-      # wizcli tag — links the pushed image digest to the scan result in Wiz,
-      # enabling code-to-cloud tracing (CVE → image → repo commit → source file).
+      # Tag AFTER push — wizcli reads the registry digest to create the
+      # code-to-cloud link: CVE in running Cloud Run → image digest → this commit.
+      # GitHub Actions env vars (GITHUB_SHA, GITHUB_REPOSITORY, etc.) are read
+      # automatically by wizcli for the code stage metadata.
       - name: Wiz tag image for code-to-cloud mapping
         env:
           WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
