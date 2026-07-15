@@ -65,6 +65,7 @@ jobs:
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
         run: |
           ./wizcli scan container-image "${{ steps.build.outputs.image }}" \
+            --policies "Default vulnerabilities policy" \
             --output table
 
       - name: Push image to GCR
@@ -77,6 +78,7 @@ jobs:
       # GitHub Actions env vars (GITHUB_SHA, GITHUB_REPOSITORY, etc.) are read
       # automatically by wizcli for the code stage metadata.
       - name: Wiz tag image for code-to-cloud mapping
+        continue-on-error: true
         env:
           WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
