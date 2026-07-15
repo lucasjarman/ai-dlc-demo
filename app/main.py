@@ -111,11 +111,12 @@ def health():
 def list_customers(search: str = Query(default="")):
     db = get_db()
     if search:
-        # SECURITY ISSUE: SQL injection via string interpolation
-        query = f"SELECT * FROM customers WHERE first_name LIKE '%{search}%' OR last_name LIKE '%{search}%' OR email LIKE '%{search}%'"
+        query = "SELECT * FROM customers WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ?"
+        search_param = f"%{search}%"
+        rows = db.execute(query, (search_param, search_param, search_param)).fetchall()
     else:
         query = "SELECT * FROM customers LIMIT 50"
-    rows = db.execute(query).fetchall()
+        rows = db.execute(query).fetchall()
     return [dict(row) for row in rows]
 
 
