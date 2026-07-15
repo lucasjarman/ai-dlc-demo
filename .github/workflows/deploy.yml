@@ -54,10 +54,18 @@ jobs:
           curl -fsSLo wizcli https://downloads.wiz.io/v1/wizcli/latest/wizcli-linux-amd64
           chmod +x wizcli
 
-      # Scan the LOCAL image before pushing.
-      # Findings are reported to Wiz automatically (Findings > Code & Build Scans).
-      # continue-on-error keeps the pipeline running even if a policy would fail —
-      # for this demo we want findings visible in Wiz without blocking deploys.
+      # Source code scan — IaC misconfigs + SAST (these engines need source, not container FS)
+      - name: Wiz source scan (IaC + SAST)
+        continue-on-error: true
+        env:
+          WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+          WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
+        run: |
+          ./wizcli scan dir . \
+            --policies "Default IaC policy" \
+            --policies "Default SAST policy (Wiz CI/CD scan)"
+
+      # Container image scan — vulns, secrets, sensitive data, software license
       - name: Wiz image scan
         continue-on-error: true
         env:
