@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InsightHub — Customer Intelligence Platform</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50: '#f0f4ff', 500: '#4f6ef7', 600: '#3b5ce6', 700: '#2d48cc' },
+            surface: { 800: '#1a1f2e', 900: '#0f1117', 950: '#090b10' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #0f1117; }
+    .card { background: #1a1f2e; border: 1px solid rgba(255,255,255,0.06); }
+    .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 9999px; font-size: 11px; font-weight: 600; }
+    .tag-enterprise { background: rgba(79,110,247,0.18); color: #7b9cff; }
+    .tag-professional { background: rgba(34,197,94,0.14); color: #4ade80; }
+    .tag-starter { background: rgba(148,163,184,0.14); color: #94a3b8; }
+    .shimmer { animation: shimmer 1.5s infinite linear; background: linear-gradient(90deg, #1a1f2e 25%, #222736 50%, #1a1f2e 75%); background-size: 200% 100%; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+    tr:hover td { background: rgba(255,255,255,0.025); }
+    input:focus { outline: none; box-shadow: 0 0 0 2px rgba(79,110,247,0.4); }
+    ::-webkit-scrollbar { width: 6px; } ::-webkit-scrollbar-track { background: #0f1117; } ::-webkit-scrollbar-thumb { background: #2d3450; border-radius: 3px; }
+  </style>
+</head>
+<body class="h-full text-slate-200 font-sans antialiased">
+
+  <!-- Sidebar -->
+  <div class="fixed inset-y-0 left-0 w-56 bg-surface-950 border-r border-white/5 flex flex-col z-20">
+    <div class="flex items-center gap-2.5 px-5 py-5 border-b border-white/5">
+      <div class="w-7 h-7 rounded-lg bg-brand-500 flex items-center justify-center">
+        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <span class="text-sm font-semibold tracking-tight text-white">InsightHub</span>
+    </div>
+    <nav class="flex-1 px-3 py-4 space-y-0.5">
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-500/10 text-brand-500 text-sm font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Customers
+      </a>
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Analytics
+      </a>
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Revenue
+      </a>
+      <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-white/5 text-sm transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Settings
+      </a>
+    </nav>
+    <div class="px-3 py-4 border-t border-white/5">
+      <div class="flex items-center gap-2.5 px-2">
+        <div class="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-xs font-bold">AT</div>
+        <div class="min-w-0">
+          <p class="text-xs font-medium text-slate-200 truncate">Alexandra Torres</p>
+          <p class="text-xs text-slate-500 truncate">CEO</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div class="pl-56 min-h-screen">
+    <header class="sticky top-0 z-10 bg-surface-900/80 backdrop-blur-sm border-b border-white/5 px-8 py-4 flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-semibold text-white">Customers</h1>
+        <p class="text-xs text-slate-400 mt-0.5">Customer accounts and subscription data</p>
+      </div>
+      <button onclick="exportData()" class="flex items-center gap-2 px-3.5 py-2 bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium rounded-lg transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Export
+      </button>
+    </header>
+
+    <main class="px-8 py-6">
+      <!-- Stats row -->
+      <div class="grid grid-cols-4 gap-4 mb-6" id="stats-row">
+        <div class="card rounded-xl p-5 shimmer h-24"></div>
+        <div class="card rounded-xl p-5 shimmer h-24"></div>
+        <div class="card rounded-xl p-5 shimmer h-24"></div>
+        <div class="card rounded-xl p-5 shimmer h-24"></div>
+      </div>
+
+      <!-- Search + table -->
+      <div class="card rounded-xl overflow-hidden">
+        <div class="px-5 py-4 border-b border-white/5 flex items-center gap-3">
+          <div class="relative flex-1 max-w-sm">
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <input id="search-input" type="text" placeholder="Search customers…"
+              class="w-full pl-9 pr-4 py-2 bg-surface-900 border border-white/10 rounded-lg text-sm text-slate-200 placeholder-slate-500 transition-shadow"
+              oninput="debounceSearch(this.value)" />
+          </div>
+          <span id="result-count" class="text-xs text-slate-500"></span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-white/5">
+                <th class="text-left px-5 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">Customer</th>
+                <th class="text-left px-5 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">Contact</th>
+                <th class="text-left px-5 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">Plan</th>
+                <th class="text-right px-5 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">MRR</th>
+                <th class="text-left px-5 py-3 text-xs font-medium text-slate-400 uppercase tracking-wider">Since</th>
+              </tr>
+            </thead>
+            <tbody id="customer-table-body">
+              <tr><td colspan="5" class="px-5 py-8 text-center text-slate-500 text-sm">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    let searchTimer = null;
+
+    function debounceSearch(val) {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => loadCustomers(val), 300);
+    }
+
+    function planTag(plan) {
+      const map = { Enterprise: 'tag-enterprise', Professional: 'tag-professional', Starter: 'tag-starter' };
+      return `<span class="tag ${map[plan] || ''}">${plan}</span>`;
+    }
+
+    function fmt(n) {
+      return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+    }
+
+    async function loadCustomers(search = '') {
+      const tbody = document.getElementById('customer-table-body');
+      tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-8 text-center text-slate-500 text-sm">Loading…</td></tr>';
+      const res = await fetch(`/api/customers?search=${encodeURIComponent(search)}`);
+      const data = await res.json();
+      document.getElementById('result-count').textContent = `${data.length} result${data.length === 1 ? '' : 's'}`;
+      if (!data.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="px-5 py-8 text-center text-slate-500 text-sm">No customers found</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(c => `
+        <tr class="border-b border-white/5 cursor-pointer transition-colors">
+          <td class="px-5 py-3.5">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                ${c.first_name[0]}${c.last_name[0]}
+              </div>
+              <div>
+                <p class="font-medium text-slate-100">${c.first_name} ${c.last_name}</p>
+                <p class="text-xs text-slate-500">ID #${c.id}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-5 py-3.5 text-slate-300">${c.email}</td>
+          <td class="px-5 py-3.5">${planTag(c.plan)}</td>
+          <td class="px-5 py-3.5 text-right font-medium text-slate-100">${fmt(c.monthly_spend)}</td>
+          <td class="px-5 py-3.5 text-slate-400">${c.created_at}</td>
+        </tr>
+      `).join('');
+    }
+
+    async function loadStats() {
+      const res = await fetch('/api/stats');
+      const s = await res.json();
+      document.getElementById('stats-row').innerHTML = `
+        <div class="card rounded-xl p-5">
+          <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Total Customers</p>
+          <p class="text-2xl font-bold text-white">${s.total_customers}</p>
+        </div>
+        <div class="card rounded-xl p-5">
+          <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Monthly Revenue</p>
+          <p class="text-2xl font-bold text-white">${fmt(s.monthly_revenue)}</p>
+        </div>
+        <div class="card rounded-xl p-5">
+          <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Enterprise</p>
+          <p class="text-2xl font-bold text-white">${s.by_plan.enterprise}</p>
+        </div>
+        <div class="card rounded-xl p-5">
+          <p class="text-xs text-slate-400 uppercase tracking-wider mb-1">Professional</p>
+          <p class="text-2xl font-bold text-white">${s.by_plan.professional}</p>
+        </div>
+      `;
+    }
+
+    function exportData() {
+      window.location.href = '/api/export';
+    }
+
+    loadStats();
+    loadCustomers();
+  </script>
+</body>
+</html>

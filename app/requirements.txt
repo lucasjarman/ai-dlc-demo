@@ -1,0 +1,10 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+google-cloud-storage==2.10.0
+# The following packages are pinned to versions with known CVEs
+# to demonstrate Wiz container vulnerability scanning
+pillow==9.0.0
+cryptography==36.0.0
+Jinja2==3.0.0
+aiofiles==23.2.1
+python-multipart==0.0.6
