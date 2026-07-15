@@ -65,8 +65,7 @@ jobs:
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
         run: |
           ./wizcli scan container-image "${{ steps.build.outputs.image }}" \
-            --policies "Default vulnerabilities policy" \
-            --output table
+            --policies "Default vulnerabilities policy"
 
       - name: Push image to GCR
         run: |
