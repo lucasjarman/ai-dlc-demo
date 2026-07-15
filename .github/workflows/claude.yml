@@ -38,5 +38,5 @@ jobs:
           # Allow Wiz's GitHub bot to trigger Claude on auto-created security issues
           allowed_bots: "wiz-a64490fd2c"
           claude_args: |
-            --model claude-sonnet-4-5-20250929
+            --model claude-haiku-4-5-20251001
             --allowedTools "Bash(pip install:*),Bash(pip-audit:*),Bash(git add:*),Bash(git commit:*),Bash(git push:*)"
