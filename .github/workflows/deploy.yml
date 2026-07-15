@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write  # for Workload Identity Federation
+      id-token: write
 
     steps:
       - name: Checkout
@@ -35,6 +35,14 @@ jobs:
       - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
 
+      # Login to Wiz registry to pull the Runtime Sensor image in the Docker build
+      - name: Login to Wiz registry
+        uses: docker/login-action@v3
+        with:
+          registry: wizio.azurecr.io
+          username: ${{ secrets.WIZ_REGISTRY_USERNAME }}
+          password: ${{ secrets.WIZ_REGISTRY_PASSWORD }}
+
       - name: Build image
         id: build
         run: |
@@ -42,33 +50,36 @@ jobs:
           docker build -t "$IMAGE" -t "${IMAGE%:*}:latest" ./app
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
-      # wizcli image scan — produces code-to-cloud mapping in Wiz
-      # This links CVEs and secrets found in the image back to this repo + commit
+      # wizcli image scan — posts findings to Wiz platform and evaluates CI/CD policy.
+      # Non-blocking (--exit-code 0 or no --policies flag) so build continues with findings.
+      # The separate 'wizcli tag' step below creates the code-to-cloud mapping in Wiz.
       - name: Install wizcli
         run: |
-          curl -sLo wizcli https://downloads.wiz.io/wizcli/latest/wizcli-linux-amd64
+          curl -fsSLo wizcli https://downloads.wiz.io/v1/wizcli/latest/wizcli-linux-amd64
           chmod +x wizcli
-          sudo mv wizcli /usr/local/bin/
 
       - name: Wiz image scan
         env:
           WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
         run: |
-          wizcli auth --id "$WIZ_CLIENT_ID" --secret "$WIZ_CLIENT_SECRET"
-          # Scan the image — non-blocking (--exit-code 0) so build continues even with findings.
-          # Findings are reported to the Wiz platform for code-to-cloud tracing.
-          wizcli docker scan \
-            --image "${{ steps.build.outputs.image }}" \
-            --tag "repo=${{ github.repository }},commit=${{ github.sha }},branch=${{ github.ref_name }}" \
-            --output table \
-            --exit-code 0
+          ./wizcli scan container-image "${{ steps.build.outputs.image }}" \
+            --output table
 
       - name: Push image to Artifact Registry
         run: |
           IMAGE="${{ steps.build.outputs.image }}"
           docker push "$IMAGE"
           docker push "${IMAGE%:*}:latest"
+
+      # wizcli tag — links the pushed image digest to the scan result in Wiz,
+      # enabling code-to-cloud tracing (CVE → image → repo commit → source file).
+      - name: Wiz tag image for code-to-cloud mapping
+        env:
+          WIZ_CLIENT_ID: ${{ secrets.WIZ_CLIENT_ID }}
+          WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
+        run: |
+          ./wizcli tag "${{ steps.build.outputs.image }}"
 
       - name: Deploy to Cloud Run
         run: |

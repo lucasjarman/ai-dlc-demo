@@ -1,3 +1,10 @@
+# Stage 1: Wiz Runtime Sensor (pulled from authenticated Wiz registry)
+# Registry credentials come from: BWS wiz-registry-username / wiz-registry-password
+# Build with: --secret id=wiz_reg_pass,env=WIZ_REGISTRY_PASS
+# or pre-login: docker login wizio.azurecr.io -u <user> -p <pass>
+FROM wizio.azurecr.io/sensor-serverless AS wiz-sensor
+
+# Stage 2: Application image
 FROM python:3.9-slim
 
 WORKDIR /app
@@ -7,14 +14,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Install Wiz Runtime Sensor (embedded mode for Cloud Run)
-RUN apt-get update && apt-get install -y --no-install-recommends curl ca-certificates && \
-    curl -fsSL "https://downloads.wiz.io/sensor/latest/linux/amd64/wiz-sensor" -o /wiz-sensor && \
-    chmod +x /wiz-sensor && \
-    apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+# Copy Wiz Runtime Sensor binary from stage 1
+COPY --from=wiz-sensor /opt/wiz/sensor /opt/wiz/sensor
 
 EXPOSE 8080
 
-# Wiz sensor wraps the app process — set WIZ_SENSOR_KEY at runtime
-ENTRYPOINT ["/wiz-sensor", "--"]
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Sensor wraps the app process.
+# At runtime, set WIZ_API_CLIENT_ID and WIZ_API_CLIENT_SECRET env vars
+# (from a Wiz Service Account with type=Sensor).
+ENTRYPOINT ["/opt/wiz/sensor/wiz-sensor", "daemon", "--", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

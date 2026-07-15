@@ -15,8 +15,15 @@ variable "app_image" {
   default     = ""
 }
 
-variable "wiz_sensor_key" {
-  description = "Wiz Runtime Sensor enrollment key (from Wiz portal > Deployments)"
+variable "wiz_sensor_client_id" {
+  description = "Wiz Service Account Client ID for the Runtime Sensor (Settings > Access Management > Service Accounts, type=Sensor)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "wiz_sensor_client_secret" {
+  description = "Wiz Service Account Client Secret for the Runtime Sensor"
   type        = string
   sensitive   = true
   default     = ""

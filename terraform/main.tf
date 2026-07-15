@@ -21,6 +21,12 @@ resource "google_cloud_run_v2_service" "app" {
   template {
     service_account = google_service_account.app_sa.email
 
+    # cpu-throttling off keeps the sensor process alive between requests
+    # (avoids the 10-min activation delay on default request-based billing)
+    scaling {
+      min_instance_count = 1
+    }
+
     containers {
       image = local.image
 
@@ -34,10 +40,28 @@ resource "google_cloud_run_v2_service" "app" {
       }
 
       dynamic "env" {
-        for_each = var.wiz_sensor_key != "" ? [1] : []
+        for_each = var.wiz_sensor_client_id != "" ? [1] : []
         content {
-          name  = "WIZ_SENSOR_KEY"
-          value = var.wiz_sensor_key
+          name  = "WIZ_API_CLIENT_ID"
+          value = var.wiz_sensor_client_id
+        }
+      }
+
+      dynamic "env" {
+        for_each = var.wiz_sensor_client_secret != "" ? [1] : []
+        content {
+          name  = "WIZ_API_CLIENT_SECRET"
+          value = var.wiz_sensor_client_secret
+        }
+      }
+
+      # --no-cpu-throttling ensures the sensor stays active between requests
+      # (avoids 10-min activation delay with default request-based billing)
+      dynamic "env" {
+        for_each = var.wiz_sensor_client_id != "" ? [1] : []
+        content {
+          name  = "WIZ_NO_CPU_THROTTLING"
+          value = "true"
         }
       }
 
