@@ -65,7 +65,12 @@ jobs:
           WIZ_CLIENT_SECRET: ${{ secrets.WIZ_CLIENT_SECRET }}
         run: |
           ./wizcli scan container-image "${{ steps.build.outputs.image }}" \
-            --policies "Default vulnerabilities policy"
+            --policies "Default vulnerabilities policy" \
+            --policies "Default secrets policy" \
+            --policies "Default IaC policy" \
+            --policies "Default sensitive data policy" \
+            --policies "Default SAST policy (Wiz CI/CD scan)" \
+            --policies "Default software license policy"
 
       - name: Push image to GCR
         run: |
