@@ -101,3 +101,25 @@ jobs:
             --image "${{ steps.build.outputs.image }}" \
             --region ${{ env.REGION }} \
             --quiet
+
+      # --- GKE deployment (same image, Workload Identity to same over-privileged SA) ---
+
+      - name: Install gke-gcloud-auth-plugin
+        continue-on-error: true
+        run: gcloud components install gke-gcloud-auth-plugin --quiet 2>/dev/null || sudo apt-get install -y google-cloud-sdk-gke-gcloud-auth-plugin
+
+      - name: Get GKE credentials
+        continue-on-error: true
+        run: |
+          gcloud container clusters get-credentials ${{ env.SERVICE }} \
+            --region ${{ env.REGION }} \
+            --project ${{ env.PROJECT_ID }}
+
+      - name: Deploy to GKE
+        continue-on-error: true
+        run: |
+          sed -e "s|IMAGE_PLACEHOLDER|${{ steps.build.outputs.image }}|g" \
+              -e "s|PROJECT_ID_PLACEHOLDER|${{ env.PROJECT_ID }}|g" \
+              -e "s|WIZ_SENSOR_CLIENT_ID_PLACEHOLDER|${{ secrets.WIZ_SENSOR_CLIENT_ID }}|g" \
+              -e "s|WIZ_SENSOR_CLIENT_SECRET_PLACEHOLDER|${{ secrets.WIZ_SENSOR_CLIENT_SECRET }}|g" \
+              kubernetes/deployment.yaml | kubectl apply -f -
