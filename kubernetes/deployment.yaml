@@ -30,15 +30,17 @@ spec:
       containers:
         - name: app
           image: IMAGE_PLACEHOLDER
+          # Override the image's ENTRYPOINT (wiz-sensor serverless wrapper) — that sensor
+          # variant only supports ECS/EKS Fargate, ACA, and Cloud Run, not Kubernetes.
+          # Runtime detection on this cluster comes from the Wiz DaemonSet sensor (namespace: wiz)
+          # instead, which monitors every pod via eBPF regardless of what's in the container.
+          command: ["uvicorn"]
+          args: ["main:app", "--host", "0.0.0.0", "--port", "8080"]
           ports:
             - containerPort: 8080
           env:
             - name: DATA_BUCKET
               value: PROJECT_ID_PLACEHOLDER-customer-data
-            - name: WIZ_API_CLIENT_ID
-              value: WIZ_SENSOR_CLIENT_ID_PLACEHOLDER
-            - name: WIZ_API_CLIENT_SECRET
-              value: WIZ_SENSOR_CLIENT_SECRET_PLACEHOLDER
           resources:
             requests:
               cpu: "250m"

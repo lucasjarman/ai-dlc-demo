@@ -120,6 +120,4 @@ jobs:
         run: |
           sed -e "s|IMAGE_PLACEHOLDER|${{ steps.build.outputs.image }}|g" \
               -e "s|PROJECT_ID_PLACEHOLDER|${{ env.PROJECT_ID }}|g" \
-              -e "s|WIZ_SENSOR_CLIENT_ID_PLACEHOLDER|${{ secrets.WIZ_SENSOR_CLIENT_ID }}|g" \
-              -e "s|WIZ_SENSOR_CLIENT_SECRET_PLACEHOLDER|${{ secrets.WIZ_SENSOR_CLIENT_SECRET }}|g" \
               kubernetes/deployment.yaml | kubectl apply -f -
